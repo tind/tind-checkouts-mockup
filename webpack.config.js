@@ -4,7 +4,6 @@ const { VueLoaderPlugin } = require("vue-loader");
 
 module.exports = {
     entry: path.resolve(__dirname, 'src', 'index.js'),
-    mode: 'development',
     devtool: 'inline-source-map',
     devServer: {
         contentBase: './dist',
