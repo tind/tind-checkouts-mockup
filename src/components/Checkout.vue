@@ -41,7 +41,7 @@
                     <col span="1" class="w-25">
                     <col span="1" class="w-75">
                 </colgroup>
-                <tr>
+                <tr v-if="active">
                     <th scope="row">Checkout Time</th>
                     <td>{{ checkoutDate }}</td>
                 </tr>
