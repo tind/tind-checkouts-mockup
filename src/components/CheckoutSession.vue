@@ -1,5 +1,5 @@
 <template>
-    <div class="col">
+    <div>
         <div class="form-group">
             <label :for="inputId">Scan in an item barcode</label>
             <div class="input-group">
@@ -17,17 +17,19 @@
                 </div>
             </div>
         </div>
-        <div>Total items scanned: {{ checkouts.length }}</div>
+        <div class="mb-2">Total items scanned: {{ checkouts.length }}</div>
+        <!--<div class="list-group">
+            <tind-checkout v-for="(checkout, index) in checkouts"
+                           :key="checkout.barcode"
+                           :state="checkout.ref.state"
+                           :index="index"></tind-checkout>
+        </div> -->
         <table class="table table-sm">
             <thead>
                 <tr>
-                    <th>No.</th>
-                    <th>Barcode</th>
-                    <th>Title</th>
-                    <th>Policy</th>
-                    <th>Due Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th class="w-25">Barcode</th>
+                    <th class="w-50">Title</th>
+                    <th class="w-25 text-right">Status</th>
                 </tr>
             </thead>
             <tbody>

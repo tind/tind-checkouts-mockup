@@ -6,7 +6,7 @@
                 <button @click="resetBorrower"
                         :disabled="state.matches('pending')"
                         class="btn btn-outline-danger">Reset</button>
-                <button :disabled="checkouts.length == 0"
+                <button :disabled="checkouts.length == 0 || anyLoading"
                         class="btn btn-outline-secondary ml-1">Send receipt</button>
                 <button :disabled="anyLoading" class="btn btn-success ml-1">Finish</button>
             </div>

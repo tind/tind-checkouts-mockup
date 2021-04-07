@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "build": "npx webpack-cli",
-    "start": "npx webpack-cli serve --open"
+    "start": "npx webpack-cli serve --mode development"
   },
   "keywords": [],
   "author": "",

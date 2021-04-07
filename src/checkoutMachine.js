@@ -9,7 +9,9 @@ const checkoutMachine = Machine({
         itemBarcode: '',
         itemTitle: '',
         checkoutPolicy: '',
-        checkoutDue: new Date()
+        checkoutDue: new Date(),
+        checkoutTime: new Date(),
+        blocks: []
     },
     states: {
         initial: {
@@ -48,7 +50,12 @@ const checkoutMachine = Machine({
                     target: 'active'
                 },
                 onError: {
-                    target: 'rejected'
+                    target: 'rejected',
+                    actions: assign({
+                        blocks: (context, event) => {
+                            return [...context.blocks, 'This barcode is forbidden!', 'It is very forbidden.']
+                        }
+                    })
                 }
             }
         },
