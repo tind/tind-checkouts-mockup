@@ -9,35 +9,26 @@
                         :disabled="state.matches({selected: 'loading'})"
                         @keyup.enter="onScanIn"
                         type="text"
-                        class="form-control"
+                        :class="{'form-control': true, 'is-invalid': !isValid}"
                         placeholder="Item barcode"
                         aria-label="Scan in an item barcode">
                 <div class="input-group-append">
-                    <button :disabled="state.matches({selected: 'loading'})" @click="onScanIn" class="btn btn-primary">Scan in</button>
+                    <button :disabled="state.matches({selected: 'loading'}) || !isValid" @click="onScanIn" class="btn btn-primary">Scan in</button>
                 </div>
             </div>
         </div>
         <div class="mb-2">Total items scanned: {{ checkouts.length }}</div>
-        <!--<div class="list-group">
-            <tind-checkout v-for="(checkout, index) in checkouts"
-                           :key="checkout.barcode"
-                           :state="checkout.ref.state"
-                           :index="index"></tind-checkout>
-        </div> -->
         <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th class="w-25">Barcode</th>
-                    <th class="w-50">Title</th>
-                    <th class="w-25 text-right">Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tind-checkout v-for="(checkout, index) in checkouts"
-                                :key="checkout.barcode"
-                                :state="checkout.ref.state"
-                                :index="index"></tind-checkout>
-            </tbody>
+            <tr>
+                <th class="w-25">Barcode</th>
+                <th class="w-50">Title</th>
+                <th class="w-25 text-right">Status</th>
+            </tr>
+            <tind-checkout v-for="(checkout, index) in checkouts"
+                            :key="checkout.barcode"
+                            :state="checkout.ref.state"
+                            :send="checkout.ref.send"
+                            :index="index"></tind-checkout>
         </table>
     </div>
 </template>
@@ -69,6 +60,13 @@ export default {
         },
         inputId() {
             return `${this.id}-input`;
+        },
+        isValid() {
+            if (this.state.context.checkouts.length == 0) {
+                return true;
+            }
+
+            return this.state.context.checkouts.every(checkout => checkout.barcode != this.barcode);
         }
     },
     methods: {

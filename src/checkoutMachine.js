@@ -15,52 +15,47 @@ const checkoutMachine = Machine({
     },
     states: {
         initial: {
-            invoke: {
-                src: (context, event) => {
-                    return Promise.resolve({
-                        itemTitle: faker.lorem.sentence(),
-                        checkoutPolicy: faker.lorem.word(),
-                        checkoutDue: faker.date.future()
-                    });
-                },
-                onDone: {
-                    target: 'loaded',
-                    actions: [
-                        assign((context, event) => {
-                            return event.data;
-                        })
-                    ]
-                }
-            }
+            entry: 'loadData',
+            always: 'loading'
         },
-        loaded: {
-            invoke: {
-                src: (context, event) => {
-                    return new Promise((resolve, reject) => {
-                        setTimeout(() => {
-                            if (context.itemBarcode == 1234) {
-                                reject();
-                            } else {
-                                resolve();
-                            }
-                        }, 1000);
-                    })
-                },
-                onDone: {
-                    target: 'active'
-                },
-                onError: {
-                    target: 'rejected',
-                    actions: assign({
-                        blocks: (context, event) => {
-                            return [...context.blocks, 'This barcode is forbidden!', 'It is very forbidden.']
-                        }
-                    })
-                }
-            }
+        loading: {
+            after: [
+                { delay: 1000, target: 'rejected', cond: 'isBlocked' },
+                { delay: 1000, target: 'active' }
+            ]
         },
         active: {},
-        rejected: {}
+        rejected: {
+            on: {
+                OVERRIDE: {
+                    target: 'loading',
+                    actions: 'resetBlocks'
+                }
+            }
+        }
+    }
+},
+{
+    actions: {
+        loadData: assign({
+            itemTitle: () => faker.lorem.sentence(),
+            checkoutPolicy: () => faker.lorem.word(),
+            checkoutDue: () => faker.date.future(),
+            blocks: context => {
+                console.log(context);
+                return context.itemBarcode == 1234
+                    ? [...context.blocks, 'This barcode is forbidden!', 'It is very forbidden.']
+                    : []
+            }
+        }),
+        resetBlocks: assign({
+            blocks: []
+        })
+    },
+    guards: {
+        isBlocked: (context, event) => {
+            return context.blocks.length > 0;
+        }
     }
 })
 

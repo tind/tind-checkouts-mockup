@@ -1,32 +1,20 @@
 <template>
-    <!-- <div class="list-group-item">
-        <div class="d-flex justify-content-between">
-            <div class="mb-1 h6">{{ state.context.itemTitle }}</div>
-            <div>
-                <button v-if="state.matches('initial') || state.matches('loaded')"
-                        class="btn btn-outline-secondary btn-sm" disabled>Checking out...</button>
-                <button v-else-if="state.matches('active')"
-                        class="btn btn-outline-success btn-sm">Checked out: {{ date }}</button>
-                <button v-else-if="state.matches('rejected')"
-                        class="btn btn-outline-danger btn-sm">Problems</button>
-            </div>
-        </div>
-        <small>{{ state.context.itemBarcode }}</small>
-    </div> -->
     <tr>
-        <td :rowspan="barcodeRowspan">{{ state.context.itemBarcode }}</td>
-        <td>{{ state.context.itemTitle }}</td>
+        <td :rowspan="barcodeRowspan">{{ barcode }}</td>
+        <td>{{ title }}</td>
         <td class="text-right">
-            <button :disabled="state.matches('initial') || state.matches('loaded')"
+            <span v-if="loading">Checking out...</span>
+            <span v-else-if="active"><i class="bi bi-clock-fill"></i>&nbsp;{{ dueDate }}</span>
+            <span v-else-if="rejected" class="text-danger"><i class="bi bi-exclamation-octagon-fill"></i>&nbsp;Problems</span>
+            &nbsp;
+            <button :disabled="loading"
                     :class="{btn: true,
-                             'btn-sm': true,
-                             'btn-outline-secondary': loading,
-                             'btn-outline-success': active,
-                             'btn-outline-danger': rejected}"
+                            'btn-sm': true,
+                            'btn-outline-secondary': loading,
+                            'btn-outline-success': active,
+                            'btn-outline-danger': rejected}"
                     @click="expanded = !expanded">
-                <template v-if="loading">Checking out...</template>
-                <template v-else-if="active">Checked out: {{ dueDate }}</template>
-                <template v-else-if="rejected">Problems</template>
+                Details
                 <template v-if="active || rejected">
                     <template v-if="expanded">&nbsp;▲</template>
                     <template v-else>&nbsp;▼</template>
@@ -41,9 +29,13 @@
                     <col span="1" class="w-25">
                     <col span="1" class="w-75">
                 </colgroup>
-                <tr v-if="active">
+                <tr>
                     <th scope="row">Checkout Time</th>
-                    <td>{{ checkoutDate }}</td>
+                    <td><span v-if="active">{{ checkoutDate }}</span></td>
+                </tr>
+                <tr>
+                    <th scope="row">Due Date</th>
+                    <td><span v-if="active">{{ dueDate }}</span></td>
                 </tr>
                 <tr>
                     <th scope="row">Loan Rule</th>
@@ -58,7 +50,11 @@
                 </tr>
             </table>
         </td>
-        <td></td>
+        <td class="text-right">
+            <div v-if="blocks.length > 0" class="btn-group-vertical">
+                <button @click="override" class="btn btn-sm btn-outline-secondary">Override blockers</button>
+            </div>
+        </td>
     </tr>
 </template>
 
@@ -66,7 +62,7 @@
 import moment from 'moment';
 
 export default {
-    props: ['state', 'index'],
+    props: ['state', 'send', 'index'],
     data() {
         return {
             expanded: false
@@ -75,6 +71,12 @@ export default {
     computed: {
         blocks() {
             return this.state.context.blocks;
+        },
+        barcode() {
+            return this.state.context.itemBarcode;
+        },
+        title() {
+            return this.state.context.itemTitle;
         },
         checkoutDate() {
             return moment(this.state.context.checkoutDate).format("yyyy-MM-DD hh:mm:ss");
@@ -86,7 +88,7 @@ export default {
             return this.state.context.checkoutPolicy;
         },
         loading() {
-            return this.state.matches('initial') || this.state.matches('loaded')
+            return this.state.matches('initial') || this.state.matches('loading');
         },
         active() {
             return this.state.matches('active');
@@ -96,6 +98,11 @@ export default {
         },
         barcodeRowspan() {
             return this.expanded ? "2" : "1";
+        }
+    },
+    methods: {
+        override() {
+            this.send("OVERRIDE");
         }
     }
 }
