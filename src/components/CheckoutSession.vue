@@ -71,9 +71,11 @@ export default {
     },
     methods: {
         onScanIn() {
-            this.send({type: 'CHECKOUT_BARCODE', payload: this.barcode});
-            this.barcode = '';
-            this.scanner.focus();
+            if (this.isValid) {
+                this.send({type: 'CHECKOUT_BARCODE', payload: this.barcode});
+                this.barcode = '';
+                this.scanner.focus();
+            }
         }
     }
 }
