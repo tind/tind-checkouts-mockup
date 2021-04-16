@@ -18,18 +18,13 @@
             </div>
         </div>
         <div class="mb-2">Total items scanned: {{ checkouts.length }}</div>
-        <table class="table table-sm">
-            <tr>
-                <th class="w-25">Barcode</th>
-                <th class="w-50">Title</th>
-                <th class="w-25 text-right">Status</th>
-            </tr>
+        <div class="list-group">
             <tind-checkout v-for="(checkout, index) in checkouts"
                             :key="checkout.barcode"
                             :state="checkout.ref.state"
                             :send="checkout.ref.send"
                             :index="index"></tind-checkout>
-        </table>
+        </div>
     </div>
 </template>
 
