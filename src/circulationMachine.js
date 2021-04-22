@@ -49,6 +49,9 @@ export const circulationMachine = Machine({
                     on: {
                         CHECKOUT_BARCODE: {
                             actions: ['checkoutBarcode']
+                        },
+                        CANCEL: {
+                            actions: ['cancel']
                         }
                     }
                 }
@@ -83,6 +86,18 @@ export const circulationMachine = Machine({
                     ), { sync: true })
                 };
                 return [checkout, ...context.checkouts]
+            }
+        }),
+        cancel: assign({
+            checkouts: (context, event) => {
+                return context.checkouts.filter(checkout => {
+                    if (checkout.barcode == event.barcode) {
+                        checkout.ref.stop();
+                        return false;
+                    }
+
+                    return true;
+                })
             }
         })
     }

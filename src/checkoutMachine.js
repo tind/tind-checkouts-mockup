@@ -1,4 +1,4 @@
-import { Machine, assign, send } from 'xstate';
+import { Machine, assign, send, sendParent } from 'xstate';
 import faker from 'faker';
 
 const checkoutMachine = Machine({
@@ -30,6 +30,9 @@ const checkoutMachine = Machine({
                 OVERRIDE: {
                     target: 'loading',
                     actions: 'resetBlocks'
+                },
+                CANCEL: {
+                    actions: 'cancel'
                 }
             }
         }
@@ -50,7 +53,11 @@ const checkoutMachine = Machine({
         }),
         resetBlocks: assign({
             blocks: []
-        })
+        }),
+        cancel: sendParent((context, event) => ({
+            type: 'CANCEL',
+            barcode: context.itemBarcode
+        }))
     },
     guards: {
         isBlocked: (context, event) => {

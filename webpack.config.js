@@ -48,6 +48,10 @@ module.exports = {
                         outputPath: 'webfonts'
                     },
                 }
+            },
+            {
+                test: /\.svg$/,
+                type: 'asset/resource'
             }
         ]
     },

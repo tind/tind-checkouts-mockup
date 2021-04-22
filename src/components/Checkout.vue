@@ -1,104 +1,46 @@
 <template>
-    <!-- <tr>
-        <td :rowspan="barcodeRowspan">{{ barcode }}</td>
-        <td>{{ title }}</td>
-        <td class="text-right">
-            <span v-if="loading">Checking out...</span>
-            <span v-else-if="active"><i class="bi bi-clock-fill"></i>&nbsp;{{ dueDate }}</span>
-            <span v-else-if="rejected" class="text-danger"><i class="bi bi-exclamation-octagon-fill"></i>&nbsp;Problems</span>
-            &nbsp;
-            <button :disabled="loading"
-                    :class="{btn: true,
-                            'btn-sm': true,
-                            'btn-outline-secondary': loading,
-                            'btn-outline-success': active,
-                            'btn-outline-danger': rejected}"
-                    @click="expanded = !expanded">
-                Details
-                <template v-if="active || rejected">
-                    <template v-if="expanded">&nbsp;▲</template>
-                    <template v-else>&nbsp;▼</template>
-                </template>
-            </button>
-        </td>
-    </tr>
-    <tr v-if="expanded">
-        <td colspan="1">
-            <table class="table table-sm table-bordered table-secondary mb-0 ">
-                <colgroup>
-                    <col span="1" class="w-25">
-                    <col span="1" class="w-75">
-                </colgroup>
-                <tr>
-                    <th scope="row">Checkout Time</th>
-                    <td><span v-if="active">{{ checkoutDate }}</span></td>
-                </tr>
-                <tr>
-                    <th scope="row">Due Date</th>
-                    <td><span v-if="active">{{ dueDate }}</span></td>
-                </tr>
-                <tr>
-                    <th scope="row">Loan Rule</th>
-                    <td>{{ loanRule }}</td>
-                </tr>
-                <tr v-if="blocks.length > 0" class="table-danger">
-                    <th scope="row" :rowspan="blocks.length || 1">Blockers</th>
-                    <td>{{ blocks[0] }}</td>
-                </tr>
-                <tr v-for="(block, index) in blocks.slice(1)" :key="index" class="table-danger">
-                    <td>{{ block }}</td>
-                </tr>
-            </table>
-        </td>
-        <td class="text-right">
-            <div v-if="blocks.length > 0" class="btn-group-vertical">
-                <button @click="override" class="btn btn-sm btn-outline-secondary">Override blockers</button>
-            </div>
-        </td>
-    </tr> -->
     <div class="list-group-item">
         <div class="row">
-            <div class="col-md-1 text-center">
-                <i style="font-size: 2rem"
-                   :class="{'bi': true,
-                            'bi-check-square': active,
-                            'text-success': active,
-                            'bi-square': loading,
-                            'text-secondary': loading,
-                            'bi-exclamation-square': rejected,
-                            'text-danger': rejected}"></i>
+            <div class="col-md-1 d-flex justify-content-center">
+                <div style="height: 30px; width: 30px" class="mt-2">
+                    <img v-if="active" :src="successIcon">
+                    <img v-if="loading" :src="waitIcon">
+                    <img v-if="rejected" :src="dangerIcon">
+                </div>
             </div>
             <div class="col-md-4">
                 <p class="font-weight-bold mb-0"><a href="#">{{ title }}</a></p>
                 <small>
                     <span class="text-monospace"><a href="#">{{ barcode }}</a></span>
                     <span v-if="loading"> | Checking out...</span>
-                    <span v-else-if="active"> | Checked out | Due date: {{ dueDate }}</span>
+                    <span v-else-if="active"> | Checked out</span>
                     <span v-else-if="rejected"> | Not checked out!</span>
                 </small>
             </div>
             <div class="col-md-5">
-                <table class="table table-sm mb-0 ">
+                <table class="table table-sm table-borderless mb-0 ">
                     <colgroup>
                         <col span="1" class="w-25">
                         <col span="1" class="w-75">
                     </colgroup>
-                    <tr v-if="rejected && blocks.length > 0" class="table-danger">
-                        <th scope="row" :rowspan="blocks.length || 1">Problems</th>
-                        <td>{{ blocks[0] }}</td>
-                    </tr>
-                    <tr v-if="rejected" v-for="(block, index) in blocks.slice(1)" :key="index" class="table-danger">
-                        <td>{{ block }}</td>
-                    </tr>
+                    <template v-if="rejected">
+                        <tr v-if="blocks.length > 0" class="table-danger">
+                            <th scope="row" :rowspan="blocks.length || 1">Problems</th>
+                            <td>{{ blocks[0] }}</td>
+                        </tr>
+                        <tr v-for="(block, index) in blocks.slice(1)" :key="index" class="table-danger">
+                            <td style="border-top-style: solid; border-top-width: 1pt;">{{ block }}</td>
+                        </tr>
+                    </template>
                     <tr>
                         <th scope="row">Due Date</th>
                         <td><span v-if="active">{{ dueDate }}</span></td>
                     </tr>
-                    <tr v-if="expanded">
+                    <tr>
                         <th scope="row">Checkout Time</th>
                         <td><span v-if="active">{{ checkoutDate }}</span></td>
                     </tr>
-                    <tr v-if="expanded">
+                    <tr>
                         <th scope="row">Loan Rule</th>
                         <td>{{ loanRule }}</td>
                     </tr>
@@ -107,9 +49,10 @@
             <div class="col-md-2 text-right">
                 <p class="mb-0">
                     <div class="btn-group-vertical">
-                        <button @click="expanded = !expanded"
+                        <button :disabled="!rejected"
+                                @click="cancel"
                                 class="btn btn-sm btn-outline-secondary">
-                            Details <i :class="{'bi': true, 'bi-caret-right': !expanded, 'bi-caret-down': expanded}"></i>
+                            Cancel
                         </button>
                         <button :disabled="blocks.length == 0 || !rejected"
                                 @click="override"
@@ -125,13 +68,14 @@
 
 <script>
 import moment from 'moment';
+import successIcon from '../../assets/Success.svg';
+import waitIcon from '../../assets/Waiting.svg';
+import dangerIcon from '../../assets/Danger.svg';
 
 export default {
     props: ['state', 'send', 'index'],
-    data() {
-        return {
-            expanded: false
-        }
+    setup() {
+        return { successIcon, waitIcon, dangerIcon }
     },
     computed: {
         blocks() {
@@ -168,6 +112,9 @@ export default {
     methods: {
         override() {
             this.send("OVERRIDE");
+        },
+        cancel() {
+            this.send("CANCEL");
         }
     }
 }

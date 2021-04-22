@@ -6,7 +6,6 @@ import Section from './components/Section.vue';
 import CheckoutSession from './components/CheckoutSession.vue';
 import Checkout from './components/Checkout.vue';
 import './style.scss';
-import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const myApp = createApp(App);
 
